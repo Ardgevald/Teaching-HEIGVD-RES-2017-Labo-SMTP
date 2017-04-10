@@ -4,9 +4,6 @@ package smtpApp;
 import java.util.ArrayList;
 import smtpProtocol.SmtpMail;
 
-/**
- *
- */
 public class Mail implements SmtpMail{
    private String from;
    private ArrayList<String> to;

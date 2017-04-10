@@ -39,7 +39,7 @@ public class SmtpClient {
    }
 
    public void sendMail(SmtpMail mail) throws IOException {
-
+      // connection to server
       String line;
 
       serverSocket = new Socket(serverAddress, serverPort);
@@ -48,11 +48,13 @@ public class SmtpClient {
 
       LOGS.log(Level.INFO, inReader.readLine());
 
+      // query to server
       outWriter.write("EHLO user" + ENDL);
       outWriter.flush();
 
       LOGS.log(Level.INFO, line = inReader.readLine());
 
+      // check connection
       if (!line.startsWith(SMTP_OK)) {
          throw new IOException(line);
       }
@@ -61,6 +63,7 @@ public class SmtpClient {
          LOGS.log(Level.INFO, line = inReader.readLine());
       }
 
+      // Setting mail sender and receiver
       outWriter.write("MAIL FROM:" + mail.getFrom() + ENDL);
       outWriter.flush();
 
@@ -73,11 +76,13 @@ public class SmtpClient {
          LOGS.log(Level.INFO, inReader.readLine());
       }
 
+      // beginning mail
       outWriter.write("DATA" + ENDL);
       outWriter.flush();
       
       LOGS.log(Level.INFO, inReader.readLine());
       
+      // writing content of the mail
       outWriter.write("Content-Type: text/plain; charset=\"" + CHARSET.toLowerCase() + "\"" + ENDL);
       outWriter.write("From: " + mail.getFrom() + ENDL);
       
@@ -93,6 +98,7 @@ public class SmtpClient {
       
       LOGS.log(Level.INFO, inReader.readLine());
       
+      // ending connection with server
       outWriter.write("QUIT" + ENDL);
       outWriter.flush();
       

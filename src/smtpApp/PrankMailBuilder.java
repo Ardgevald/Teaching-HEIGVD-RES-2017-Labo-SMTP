@@ -18,26 +18,29 @@ public class PrankMailBuilder {
    private static final String MAIL_SEPARATOR = "####";
    private static final int MIN_VICTIMS = 3;
 
-   private final ArrayList<String> mailList = new ArrayList<>();
+   private final ArrayList<String> mailAddressesList = new ArrayList<>();
    private final ArrayList<Group> groups = new ArrayList<>();
 
    private final ArrayList<Mail> mails = new ArrayList<>();
 
-   private final SmtpClient client;
+   private final SmtpClient smtpClient;
 
    public PrankMailBuilder(int nbGroups, String address, int port) throws IOException, BadConfiguration {
 
-      client = new SmtpClient(address, port);
-
+      smtpClient = new SmtpClient(address, port);
+      
+      // getting the mail addresses from the victims
       BufferedReader reader = new BufferedReader(new FileReader("victims.txt"));
       while (reader.ready()) {
-         mailList.add(reader.readLine());
+         mailAddressesList.add(reader.readLine());
       }
 
-      if (mailList.size() < MIN_VICTIMS) {
+      // must contain at least three addresses
+      if (mailAddressesList.size() < MIN_VICTIMS) {
          throw new BadConfiguration("Not enough victims, must be at least 3");
       }
 
+      // getting the mails to send
       try (Scanner scanner = new Scanner(new File("mails.txt"), "UTF-8")) {
          scanner.useDelimiter(MAIL_SEPARATOR);
 
@@ -47,17 +50,20 @@ public class PrankMailBuilder {
             mail.setSubject(scanner.nextLine());
             mail.setData(scanner.next());
 
-            mails.add(mail);
+            if(!mail.getData().isEmpty() && !mail.getSubject().isEmpty()){
+               mails.add(mail);
+            }
          }
       }
 
+      // must contain at least one mail
       if (mails.isEmpty()) {
          throw new BadConfiguration("Must contain at least one mail");
       }
 
-      Collections.shuffle(mailList);
+      Collections.shuffle(mailAddressesList);
 
-      int nbVictimsPerGroup = mailList.size() / nbGroups;
+      int nbVictimsPerGroup = mailAddressesList.size() / nbGroups;
 
       // if enough victims, all groups are different
       // else, there can be overlaps
@@ -65,17 +71,17 @@ public class PrankMailBuilder {
          for (int i = 0; i < nbGroups; i++) {
             Group group = new Group();
             for (int j = 0; j < nbVictimsPerGroup; j++) {
-               group.addMail(mailList.get(i * nbVictimsPerGroup + j));
+               group.addMail(mailAddressesList.get(i * nbVictimsPerGroup + j));
             }
             groups.add(group);
          }
       } else {
          for (int i = 0; i < nbGroups; i++) {
             nbVictimsPerGroup = MIN_VICTIMS;
-            Collections.shuffle(mailList);
+            Collections.shuffle(mailAddressesList);
             Group group = new Group();
             for (int j = 0; j < nbVictimsPerGroup; j++) {
-               group.addMail(mailList.get(j));
+               group.addMail(mailAddressesList.get(j));
             }
             groups.add(group);
          }
@@ -83,17 +89,19 @@ public class PrankMailBuilder {
 
       int mailNumber = 0;
 
+      // sending mails to server with the smtpClient
       for (Group group : groups) {
          Mail mail = mails.get(mailNumber++ % mails.size());
          mail.setFrom(group.getMailAddresses().get(0));
          mail.setTo(new ArrayList<>(group.getMailAddresses().subList(1, group.getMailAddresses().size())));
 
-         client.sendMail(mail);
+         smtpClient.sendMail(mail);
       }
    }
 
    public static void main(String[] args) {
 
+      // getting default properties
       Properties prop = new Properties();
       try {
          prop.load(PrankMailBuilder.class.getResourceAsStream("config.properties"));
@@ -101,10 +109,12 @@ public class PrankMailBuilder {
          System.err.println("Could not load default properties: " + ex.getMessage());
       }
 
+      // setting default properties
       String address = prop.getProperty("smtpServerDefaultAddress");
       int port = Integer.parseUnsignedInt(prop.getProperty("smtpServerDefaultPort"));
       int nbGroups = Integer.parseUnsignedInt(prop.getProperty("defaultGroupNumber"));
 
+      // reading user parameters to get user properties
       if (args.length > 0) {
 
          try {
@@ -132,11 +142,7 @@ public class PrankMailBuilder {
       }
 
       try {
-         System.out.println("Nb groups : " + nbGroups);
-         System.out.println("address : " + address);
-         System.out.println("port : " + port);
-
-         new PrankMailBuilder(nbGroups, address, port);
+         PrankMailBuilder pmb = new PrankMailBuilder(nbGroups, address, port);
       } catch (IOException | BadConfiguration e) {
          System.err.println(e.getMessage());
       }
