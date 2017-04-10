@@ -15,7 +15,7 @@ import smtpProtocol.SmtpClient;
  */
 public class PrankMailBuilder {
 
-   private static final String MAIL_SEPARATOR = "####";
+   private static final String MAIL_SEPARATOR = "####.*[\\r\\n]";
    private static final int MIN_VICTIMS = 3;
 
    private final ArrayList<String> mailAddressesList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class PrankMailBuilder {
 
          while (scanner.hasNext()) {
             Mail mail = new Mail();
-
+            
             mail.setSubject(scanner.nextLine());
             mail.setData(scanner.next());
 

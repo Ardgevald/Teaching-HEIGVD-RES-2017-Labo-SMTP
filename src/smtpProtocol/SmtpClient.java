@@ -88,11 +88,11 @@ public class SmtpClient {
       
       outWriter.write("To: " + mail.getTo().get(0));
       for (int i = 1; i < mail.getTo().size(); i++) {
-         outWriter.write("," + mail.getTo().get(i));
+         outWriter.write(", " + mail.getTo().get(i));
       }
+      outWriter.write(ENDL);
       
       outWriter.write("Subject: " + mail.getSubject() + ENDL + ENDL);
-      
       outWriter.write(mail.getData() + END_MAIL);
       outWriter.flush();
       

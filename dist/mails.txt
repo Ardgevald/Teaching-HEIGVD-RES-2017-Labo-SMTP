@@ -1,0 +1,12 @@
+First line for each mail is the subject
+After, everything is content of the mail
+You can put anything
+
+But if you want to split to the next mail, use the delimiter
+####
+There goes the second mail
+If you want, you can put something after the delimiter
+#### this will not be in any mail
+And we go with the third
+
+There you go for the examples
