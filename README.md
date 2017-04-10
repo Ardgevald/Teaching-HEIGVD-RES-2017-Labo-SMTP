@@ -35,12 +35,12 @@ user.B@address.mail
 java -jar LaboSMTP.jar -a 127.0.0.1 -p 25
 ```
 ## parameters
-### -a|-A
+### -a|-A serverAddress
 #### _[default : localhost]_
 sets the address of the smtp server you want to connect to
-### -p|-P
+### -p|-P portNumber
 #### [default : 2525]
 sets the port you want to communicate with
-### -g|-G
+### -g|-G numberOfGroups
 #### [default : 3]
 sets the number of groups you want to set. A group is composed of minimum one sender and two receivers. The more groups you use, the less people there will be in a group. The application tries to make every group with different victims. If it's not possible, it will be completely random with the minimum of victims in each group
